@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { supabase } from "../lib/supabase";
 import { sendMessage, getSessions, getSession, type ChatSession, type ChatMessage } from "../api/chat";
 
@@ -11,6 +11,7 @@ export default function ChatPage() {
   const [user, setUser] = useState<{ name: string; picture: string | null } | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
     getSessions().then(setSessions);
@@ -83,26 +84,19 @@ export default function ChatPage() {
           <div style={{ fontSize: 20, fontWeight: 700 }}>🌸 Sahej</div>
         </div>
 
-        {/* New chat */}
-        <div style={{ padding: "12px 12px 8px" }}>
+        {/* Nav buttons */}
+        <div style={{ padding: "12px 12px 8px", display: "flex", flexDirection: "column", gap: 6 }}>
           <button
             onClick={() => setActiveSession(null)}
-            style={{
-              width: "100%",
-              padding: "10px 14px",
-              background: "rgba(124,58,237,0.6)",
-              border: "1px solid rgba(124,58,237,0.8)",
-              borderRadius: 8,
-              color: "#fff",
-              fontSize: 14,
-              fontWeight: 500,
-              textAlign: "left",
-              display: "flex",
-              alignItems: "center",
-              gap: 8,
-            }}
+            style={{ width: "100%", padding: "10px 14px", background: "rgba(124,58,237,0.6)", border: "1px solid rgba(124,58,237,0.8)", borderRadius: 8, color: "#fff", fontSize: 14, fontWeight: 500, textAlign: "left", display: "flex", alignItems: "center", gap: 8, cursor: "pointer" }}
           >
             <span style={{ fontSize: 18 }}>+</span> New chat
+          </button>
+          <button
+            onClick={() => navigate("/calculator")}
+            style={{ width: "100%", padding: "10px 14px", background: location.pathname === "/calculator" ? "rgba(245,158,11,0.25)" : "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 8, color: "rgba(255,255,255,0.8)", fontSize: 14, fontWeight: 500, textAlign: "left", display: "flex", alignItems: "center", gap: 8, cursor: "pointer" }}
+          >
+            <span style={{ fontSize: 16 }}>📊</span> Calculator
           </button>
         </div>
 

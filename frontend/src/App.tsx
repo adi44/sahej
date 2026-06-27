@@ -3,6 +3,7 @@ import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
 import { supabase } from "./lib/supabase";
 import LoginPage from "./pages/LoginPage";
 import ChatPage from "./pages/ChatPage";
+import CalculatorPage from "./pages/CalculatorPage";
 import type { Session } from "@supabase/supabase-js";
 
 export default function App() {
@@ -21,6 +22,7 @@ export default function App() {
       <Routes>
         <Route path="/" element={session ? <Navigate to="/chat" replace /> : <LoginPage />} />
         <Route path="/chat" element={session ? <ChatPage /> : <Navigate to="/" replace />} />
+        <Route path="/calculator" element={session ? <CalculatorPage /> : <Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
   );
