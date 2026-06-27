@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
+import Logo from "../components/Logo";
 import { fetchSchemeRates } from "../api/schemes";
 import { buildYearlyData, type Scheme } from "../utils/calculator";
 import SchemePresets from "../components/calculator/SchemePresets";
@@ -39,9 +40,12 @@ export default function CalculatorPage() {
   return (
     <div style={{ display: "flex", height: "100vh", background: "var(--bg)", overflow: "hidden" }}>
       {/* ── Sidebar ── */}
-      <aside style={{ width: 268, display: "flex", flexDirection: "column", background: "#14532D", color: "#fff", flexShrink: 0 }}>
+      <aside style={{ width: 268, display: "flex", flexDirection: "column", background: "#0E3D20", color: "#fff", flexShrink: 0 }}>
         <div style={{ padding: "20px 16px 12px", borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
-          <div style={{ fontSize: 20, fontWeight: 700 }}>🌸 Sahej</div>
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <Logo size={36} />
+            <span style={{ fontSize: 20, fontWeight: 800, letterSpacing: "-0.3px" }}>Sahej</span>
+          </div>
         </div>
 
         <div style={{ padding: "12px 12px 8px" }}>

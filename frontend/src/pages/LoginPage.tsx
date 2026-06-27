@@ -1,4 +1,5 @@
 import { supabase } from "../lib/supabase";
+import Logo from "../components/Logo";
 
 export default function LoginPage() {
   async function handleGoogleLogin() {
@@ -12,7 +13,7 @@ export default function LoginPage() {
     <div style={{
       minHeight: "100vh",
       display: "flex",
-      background: "linear-gradient(135deg, #16A34A 0%, #15803D 50%, #14532D 100%)",
+      background: "linear-gradient(135deg, #1C6B45 0%, #145432 50%, #0E3D20 100%)",
     }}>
       {/* Left: Branding */}
       <div style={{
@@ -23,8 +24,9 @@ export default function LoginPage() {
         padding: "60px 64px",
         color: "#fff",
       }}>
-        <div style={{ fontSize: 36, fontWeight: 700, letterSpacing: "-0.5px", marginBottom: 12 }}>
-          🌸 Sahej
+        <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 16 }}>
+          <Logo size={64} />
+          <span style={{ fontSize: 38, fontWeight: 800, letterSpacing: "-1px" }}>Sahej</span>
         </div>
         <h1 style={{ fontSize: 48, fontWeight: 700, lineHeight: 1.15, marginBottom: 20, letterSpacing: "-1px" }}>
           Smart investing<br />for every woman
@@ -59,14 +61,16 @@ export default function LoginPage() {
         padding: 40,
       }}>
         <div style={{
-          background: "#FEFCE8",
+          background: "#FEF9C3",
           borderRadius: 20,
           padding: "48px 40px",
           width: "100%",
           boxShadow: "0 25px 60px rgba(0,0,0,0.25)",
         }}>
           <div style={{ textAlign: "center", marginBottom: 32 }}>
-            <div style={{ fontSize: 40, marginBottom: 12 }}>🌸</div>
+            <div style={{ display: "flex", justifyContent: "center", marginBottom: 12 }}>
+              <Logo size={72} />
+            </div>
             <h2 style={{ fontSize: 24, fontWeight: 700, color: "#111827", marginBottom: 8 }}>
               Welcome to Sahej
             </h2>
@@ -86,7 +90,7 @@ export default function LoginPage() {
               padding: "14px 20px",
               border: "1.5px solid #E5E7EB",
               borderRadius: 10,
-              background: "#FEFCE8",
+              background: "#FEF9C3",
               color: "#374151",
               fontSize: 15,
               fontWeight: 600,
@@ -94,7 +98,7 @@ export default function LoginPage() {
               transition: "all 0.2s",
               boxShadow: "0 1px 3px rgba(0,0,0,0.08)",
             }}
-            onMouseEnter={e => (e.currentTarget.style.borderColor = "#16A34A")}
+            onMouseEnter={e => (e.currentTarget.style.borderColor = "#1C6B45")}
             onMouseLeave={e => (e.currentTarget.style.borderColor = "#E5E7EB")}
           >
             <GoogleIcon />

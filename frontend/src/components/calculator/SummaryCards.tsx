@@ -24,7 +24,7 @@ export default function SummaryCards({ invested, returns, total, years }: Props)
         label="Returns Earned"
         value={formatINR(returns)}
         sub="wealth created"
-        bg="#FFFBEB"
+        bg="#FEF9C3"
         border="#FDE68A"
         valueColor="#D97706"
       />

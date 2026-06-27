@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { supabase } from "../lib/supabase";
 import { sendMessage, getSessions, getSession, type ChatSession, type ChatMessage } from "../api/chat";
+import Logo from "../components/Logo";
 
 export default function ChatPage() {
   const [sessions, setSessions] = useState<ChatSession[]>([]);
@@ -75,20 +76,23 @@ export default function ChatPage() {
         width: 260,
         display: "flex",
         flexDirection: "column",
-        background: "#14532D",
+        background: "#0E3D20",
         color: "#fff",
         flexShrink: 0,
       }}>
         {/* Logo */}
         <div style={{ padding: "20px 16px 12px", borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
-          <div style={{ fontSize: 20, fontWeight: 700 }}>🌸 Sahej</div>
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <Logo size={36} />
+            <span style={{ fontSize: 20, fontWeight: 800, letterSpacing: "-0.3px" }}>Sahej</span>
+          </div>
         </div>
 
         {/* Nav buttons */}
         <div style={{ padding: "12px 12px 8px", display: "flex", flexDirection: "column", gap: 6 }}>
           <button
             onClick={() => setActiveSession(null)}
-            style={{ width: "100%", padding: "10px 14px", background: "rgba(22,163,74,0.6)", border: "1px solid rgba(22,163,74,0.8)", borderRadius: 8, color: "#fff", fontSize: 14, fontWeight: 500, textAlign: "left", display: "flex", alignItems: "center", gap: 8, cursor: "pointer" }}
+            style={{ width: "100%", padding: "10px 14px", background: "rgba(28,107,69,0.6)", border: "1px solid rgba(28,107,69,0.8)", borderRadius: 8, color: "#fff", fontSize: 14, fontWeight: 500, textAlign: "left", display: "flex", alignItems: "center", gap: 8, cursor: "pointer" }}
           >
             <span style={{ fontSize: 18 }}>+</span> New chat
           </button>
@@ -115,7 +119,7 @@ export default function ChatPage() {
                 width: "100%",
                 padding: "9px 10px",
                 borderRadius: 7,
-                background: activeSession?.id === s.id ? "rgba(22,163,74,0.4)" : "transparent",
+                background: activeSession?.id === s.id ? "rgba(28,107,69,0.4)" : "transparent",
                 border: "none",
                 color: activeSession?.id === s.id ? "#fff" : "rgba(255,255,255,0.65)",
                 fontSize: 13,
@@ -185,7 +189,7 @@ export default function ChatPage() {
         <div style={{ flex: 1, overflowY: "auto", padding: "24px", display: "flex", flexDirection: "column", gap: 4 }}>
           {!activeSession?.messages?.length && !loading && (
             <div style={{ margin: "auto", textAlign: "center", color: "var(--text-muted)" }}>
-              <div style={{ fontSize: 48, marginBottom: 16 }}>🌸</div>
+              <div style={{ display: "flex", justifyContent: "center", marginBottom: 12 }}><Logo size={72} /></div>
               <div style={{ fontSize: 18, fontWeight: 600, color: "var(--text)", marginBottom: 8 }}>
                 Namaste! I'm Sahej
               </div>
@@ -318,8 +322,9 @@ function MessageBubble({ msg }: { msg: ChatMessage }) {
           width: 32, height: 32, borderRadius: "50%",
           background: "var(--primary-light)",
           display: "grid", placeItems: "center",
-          fontSize: 16, flexShrink: 0, marginRight: 8, alignSelf: "flex-end",
-        }}>🌸</div>
+          flexShrink: 0, marginRight: 8, alignSelf: "flex-end",
+          overflow: "hidden",
+        }}><Logo size={28} /></div>
       )}
       <div style={{
         maxWidth: "68%",
@@ -345,8 +350,8 @@ function TypingIndicator() {
       <div style={{
         width: 32, height: 32, borderRadius: "50%",
         background: "var(--primary-light)",
-        display: "grid", placeItems: "center", fontSize: 16, flexShrink: 0,
-      }}>🌸</div>
+        display: "grid", placeItems: "center", flexShrink: 0, overflow: "hidden",
+      }}><Logo size={28} /></div>
       <div style={{
         padding: "12px 16px",
         borderRadius: "18px 18px 18px 4px",
