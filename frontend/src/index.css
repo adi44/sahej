@@ -5,16 +5,16 @@
 }
 
 :root {
-  --primary: #7C3AED;
-  --primary-light: #EDE9FE;
-  --primary-dark: #5B21B6;
-  --accent: #F59E0B;
-  --bg: #F9FAFB;
+  --primary: #16A34A;
+  --primary-light: #F0FDF4;
+  --primary-dark: #15803D;
+  --accent: #EAB308;
+  --bg: #FAFDF5;
   --surface: #FFFFFF;
   --border: #E5E7EB;
   --text: #111827;
   --text-muted: #6B7280;
-  --user-bubble: #7C3AED;
+  --user-bubble: #16A34A;
   --ai-bubble: #F3F4F6;
   --radius: 12px;
   font-family: 'Inter', system-ui, sans-serif;

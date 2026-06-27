@@ -33,8 +33,8 @@ export default function SchemePresets({ schemes, selected, onSelect, loading }: 
               style={{
                 padding: "9px 12px",
                 borderRadius: 8,
-                border: isActive ? "1.5px solid rgba(124,58,237,0.8)" : "1.5px solid transparent",
-                background: isActive ? "rgba(124,58,237,0.35)" : "rgba(255,255,255,0.04)",
+                border: isActive ? "1.5px solid rgba(22,163,74,0.8)" : "1.5px solid transparent",
+                background: isActive ? "rgba(22,163,74,0.35)" : "rgba(255,255,255,0.04)",
                 color: isActive ? "#fff" : "rgba(255,255,255,0.6)",
                 fontSize: 13,
                 textAlign: "left",

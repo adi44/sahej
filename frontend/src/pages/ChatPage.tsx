@@ -75,7 +75,7 @@ export default function ChatPage() {
         width: 260,
         display: "flex",
         flexDirection: "column",
-        background: "#1E1B4B",
+        background: "#14532D",
         color: "#fff",
         flexShrink: 0,
       }}>
@@ -88,7 +88,7 @@ export default function ChatPage() {
         <div style={{ padding: "12px 12px 8px", display: "flex", flexDirection: "column", gap: 6 }}>
           <button
             onClick={() => setActiveSession(null)}
-            style={{ width: "100%", padding: "10px 14px", background: "rgba(124,58,237,0.6)", border: "1px solid rgba(124,58,237,0.8)", borderRadius: 8, color: "#fff", fontSize: 14, fontWeight: 500, textAlign: "left", display: "flex", alignItems: "center", gap: 8, cursor: "pointer" }}
+            style={{ width: "100%", padding: "10px 14px", background: "rgba(22,163,74,0.6)", border: "1px solid rgba(22,163,74,0.8)", borderRadius: 8, color: "#fff", fontSize: 14, fontWeight: 500, textAlign: "left", display: "flex", alignItems: "center", gap: 8, cursor: "pointer" }}
           >
             <span style={{ fontSize: 18 }}>+</span> New chat
           </button>
@@ -115,7 +115,7 @@ export default function ChatPage() {
                 width: "100%",
                 padding: "9px 10px",
                 borderRadius: 7,
-                background: activeSession?.id === s.id ? "rgba(124,58,237,0.4)" : "transparent",
+                background: activeSession?.id === s.id ? "rgba(22,163,74,0.4)" : "transparent",
                 border: "none",
                 color: activeSession?.id === s.id ? "#fff" : "rgba(255,255,255,0.65)",
                 fontSize: 13,

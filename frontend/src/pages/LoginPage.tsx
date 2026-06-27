@@ -12,7 +12,7 @@ export default function LoginPage() {
     <div style={{
       minHeight: "100vh",
       display: "flex",
-      background: "linear-gradient(135deg, #7C3AED 0%, #5B21B6 50%, #4C1D95 100%)",
+      background: "linear-gradient(135deg, #16A34A 0%, #15803D 50%, #14532D 100%)",
     }}>
       {/* Left: Branding */}
       <div style={{
@@ -59,7 +59,7 @@ export default function LoginPage() {
         padding: 40,
       }}>
         <div style={{
-          background: "#fff",
+          background: "#FEFCE8",
           borderRadius: 20,
           padding: "48px 40px",
           width: "100%",
@@ -86,7 +86,7 @@ export default function LoginPage() {
               padding: "14px 20px",
               border: "1.5px solid #E5E7EB",
               borderRadius: 10,
-              background: "#fff",
+              background: "#FEFCE8",
               color: "#374151",
               fontSize: 15,
               fontWeight: 600,
@@ -94,7 +94,7 @@ export default function LoginPage() {
               transition: "all 0.2s",
               boxShadow: "0 1px 3px rgba(0,0,0,0.08)",
             }}
-            onMouseEnter={e => (e.currentTarget.style.borderColor = "#7C3AED")}
+            onMouseEnter={e => (e.currentTarget.style.borderColor = "#16A34A")}
             onMouseLeave={e => (e.currentTarget.style.borderColor = "#E5E7EB")}
           >
             <GoogleIcon />

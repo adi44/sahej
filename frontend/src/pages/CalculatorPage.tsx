@@ -39,7 +39,7 @@ export default function CalculatorPage() {
   return (
     <div style={{ display: "flex", height: "100vh", background: "var(--bg)", overflow: "hidden" }}>
       {/* ── Sidebar ── */}
-      <aside style={{ width: 268, display: "flex", flexDirection: "column", background: "#1E1B4B", color: "#fff", flexShrink: 0 }}>
+      <aside style={{ width: 268, display: "flex", flexDirection: "column", background: "#14532D", color: "#fff", flexShrink: 0 }}>
         <div style={{ padding: "20px 16px 12px", borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
           <div style={{ fontSize: 20, fontWeight: 700 }}>🌸 Sahej</div>
         </div>

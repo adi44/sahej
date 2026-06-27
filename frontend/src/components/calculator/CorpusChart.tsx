@@ -13,7 +13,7 @@ interface Props {
 function ChartTooltip({ active, payload, label }: any) {
   if (!active || !payload?.length) return null;
   return (
-    <div style={{ background: "#1E1B4B", border: "1px solid rgba(255,255,255,0.12)", borderRadius: 10, padding: "12px 16px", color: "#fff", fontSize: 13, minWidth: 190 }}>
+    <div style={{ background: "#14532D", border: "1px solid rgba(255,255,255,0.12)", borderRadius: 10, padding: "12px 16px", color: "#fff", fontSize: 13, minWidth: 190 }}>
       <div style={{ fontWeight: 600, marginBottom: 8, color: "rgba(255,255,255,0.6)" }}>{label}</div>
       {payload.map((p: any) => (
         <div key={p.name} style={{ display: "flex", justifyContent: "space-between", gap: 20, marginBottom: 4 }}>
@@ -48,8 +48,8 @@ export default function CorpusChart({ data, years }: Props) {
         <AreaChart data={data} margin={{ top: 4, right: 20, left: 20, bottom: 4 }}>
           <defs>
             <linearGradient id="gInvested" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%"  stopColor="#7C3AED" stopOpacity={0.5} />
-              <stop offset="95%" stopColor="#7C3AED" stopOpacity={0.05} />
+              <stop offset="5%"  stopColor="#16A34A" stopOpacity={0.5} />
+              <stop offset="95%" stopColor="#16A34A" stopOpacity={0.05} />
             </linearGradient>
             <linearGradient id="gReturns" x1="0" y1="0" x2="0" y2="1">
               <stop offset="5%"  stopColor="#F59E0B" stopOpacity={0.65} />
@@ -79,7 +79,7 @@ export default function CorpusChart({ data, years }: Props) {
             type="monotone"
             dataKey="invested"
             name="Amount Invested"
-            stroke="#7C3AED"
+            stroke="#16A34A"
             strokeWidth={2}
             fill="url(#gInvested)"
             stackId="1"
