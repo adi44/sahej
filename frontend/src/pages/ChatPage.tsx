@@ -3,6 +3,10 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { supabase } from "../lib/supabase";
 import { sendMessage, getSessions, getSession, type ChatSession, type ChatMessage } from "../api/chat";
 import Logo from "../components/Logo";
+import MicButton from "../components/MicButton";
+import LangToggle from "../components/LangToggle";
+import SpeakButton from "../components/SpeakButton";
+import { useSpeech } from "../hooks/useSpeech";
 
 export default function ChatPage() {
   const [sessions, setSessions] = useState<ChatSession[]>([]);
@@ -13,6 +17,7 @@ export default function ChatPage() {
   const bottomRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   const location = useLocation();
+  const { listening, speakingId, lang, setLang, sttSupported, startListening, stopListening, speak, stopSpeaking } = useSpeech();
 
   useEffect(() => {
     getSessions().then(setSessions);
@@ -234,7 +239,7 @@ export default function ChatPage() {
           )}
 
           {activeSession?.messages?.map((msg) => (
-            <MessageBubble key={msg.id} msg={msg} />
+            <MessageBubble key={msg.id} msg={msg} speakingId={speakingId} onSpeak={speak} onStop={stopSpeaking} />
           ))}
 
           {loading && <TypingIndicator />}
@@ -243,13 +248,18 @@ export default function ChatPage() {
 
         {/* Input bar */}
         <div style={{
-          padding: "16px 24px",
+          padding: "12px 24px 16px",
           borderTop: "1px solid var(--border)",
           background: "var(--surface)",
         }}>
+          {/* Lang toggle row */}
+          <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 8 }}>
+            <LangToggle lang={lang} onChange={setLang} />
+          </div>
+
           <div style={{
             display: "flex",
-            gap: 10,
+            gap: 8,
             alignItems: "flex-end",
             background: "var(--bg)",
             border: "1.5px solid var(--border)",
@@ -273,7 +283,7 @@ export default function ChatPage() {
                   handleSend();
                 }
               }}
-              placeholder="Ask about savings, investments, schemes… (Shift+Enter for new line)"
+              placeholder={lang === "hi-IN" ? "बचत और निवेश के बारे में पूछें…" : "Ask about savings, investments, schemes…"}
               disabled={loading}
               rows={1}
               style={{
@@ -291,6 +301,17 @@ export default function ChatPage() {
                 overflow: "auto",
               }}
             />
+
+            {/* Mic button */}
+            <div style={{ alignSelf: "flex-end", paddingBottom: 2 }}>
+              <MicButton
+                listening={listening}
+                supported={sttSupported}
+                onStart={() => startListening((text) => setInput(text))}
+                onStop={stopListening}
+              />
+            </div>
+
             <button
               onClick={handleSend}
               disabled={loading || !input.trim()}
@@ -318,36 +339,54 @@ export default function ChatPage() {
   );
 }
 
-function MessageBubble({ msg }: { msg: ChatMessage }) {
+function MessageBubble({ msg, speakingId, onSpeak, onStop }: {
+  msg: ChatMessage;
+  speakingId: string | null;
+  onSpeak: (text: string, id: string) => void;
+  onStop: () => void;
+}) {
   const isUser = msg.role === "user";
   return (
     <div style={{
       display: "flex",
       justifyContent: isUser ? "flex-end" : "flex-start",
       marginBottom: 8,
+      alignItems: "flex-end",
     }}>
       {!isUser && (
         <div style={{
           width: 32, height: 32, borderRadius: "50%",
           background: "var(--primary-light)",
           display: "grid", placeItems: "center",
-          flexShrink: 0, marginRight: 8, alignSelf: "flex-end",
+          flexShrink: 0, marginRight: 8,
           overflow: "hidden",
         }}><Logo size={28} /></div>
       )}
-      <div style={{
-        maxWidth: "68%",
-        padding: "11px 15px",
-        borderRadius: isUser ? "18px 18px 4px 18px" : "18px 18px 18px 4px",
-        background: isUser ? "var(--primary)" : "var(--surface)",
-        color: isUser ? "#fff" : "var(--text)",
-        fontSize: 14,
-        lineHeight: 1.65,
-        whiteSpace: "pre-wrap",
-        boxShadow: isUser ? "none" : "0 1px 3px rgba(0,0,0,0.07)",
-        border: isUser ? "none" : "1px solid var(--border)",
-      }}>
-        {msg.content}
+      <div style={{ display: "flex", flexDirection: "column", alignItems: isUser ? "flex-end" : "flex-start", maxWidth: "68%" }}>
+        <div style={{
+          padding: "11px 15px",
+          borderRadius: isUser ? "18px 18px 4px 18px" : "18px 18px 18px 4px",
+          background: isUser ? "var(--primary)" : "var(--surface)",
+          color: isUser ? "#fff" : "var(--text)",
+          fontSize: 14,
+          lineHeight: 1.65,
+          whiteSpace: "pre-wrap",
+          boxShadow: isUser ? "none" : "0 1px 3px rgba(0,0,0,0.07)",
+          border: isUser ? "none" : "1px solid var(--border)",
+        }}>
+          {msg.content}
+        </div>
+        {!isUser && (
+          <div style={{ marginTop: 4, marginLeft: 4 }}>
+            <SpeakButton
+              messageId={msg.id}
+              text={msg.content}
+              speakingId={speakingId}
+              onSpeak={onSpeak}
+              onStop={onStop}
+            />
+          </div>
+        )}
       </div>
     </div>
   );
