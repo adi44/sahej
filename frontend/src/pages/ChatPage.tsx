@@ -107,6 +107,12 @@ export default function ChatPage() {
           >
             <span style={{ fontSize: 16 }}>📊</span> Calculator
           </button>
+          <button
+            onClick={() => navigate("/profile")}
+            style={{ width: "100%", padding: "10px 14px", background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 8, color: "rgba(255,255,255,0.8)", fontSize: 14, fontWeight: 500, textAlign: "left", display: "flex", alignItems: "center", gap: 8, cursor: "pointer" }}
+          >
+            <span style={{ fontSize: 16 }}>👤</span> My Profile
+          </button>
         </div>
 
         {/* Sessions */}

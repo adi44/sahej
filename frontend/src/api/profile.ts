@@ -7,6 +7,11 @@ export interface SavedProfile {
   monthly_income: number;
   income_source: string;
   income_is_regular: boolean;
+  rent_or_emi: number;
+  other_emis: number;
+  school_fees: number;
+  groceries_utilities: number;
+  other_expenses: number;
   monthly_expenses: number;
   investable_surplus: number;
   savings_balance: number;
