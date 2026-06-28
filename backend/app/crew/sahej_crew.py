@@ -1,3 +1,4 @@
+import asyncio
 from crewai import Crew, Task, Process
 
 from app.crew.agents import (
@@ -9,12 +10,14 @@ from app.crew.agents import (
 
 class SahejCrew:
     """
-    Orchestrates the three Sahej agents to respond to a user's financial query.
+    Coach and Researcher run in parallel, Advisor synthesises both outputs.
 
-    Process:
-      1. Savings Coach frames the user's situation (goals, buckets)
-      2. Investment Researcher fetches live scheme/product options
-      3. Financial Advisor synthesises both into a final user-facing response
+    Parallel leg (simultaneous):
+      - Savings Coach   → frames the user's situation and goals
+      - Investment Researcher → fetches live scheme options + rates
+
+    Sequential leg (after both complete):
+      - Financial Advisor → synthesises into the final user-facing reply
     """
 
     def __init__(self) -> None:
@@ -31,64 +34,82 @@ class SahejCrew:
         history_text = self._format_history(chat_history)
 
         context = (
-            f"Chat history so far:\n{history_text}\n\n"
-            f"Latest user message: {user_message}"
-        ) if history_text else user_message
+            f"Chat history:\n{history_text}\n\nUser: {user_message}"
+        ) if history_text else f"User: {user_message}"
 
         profile_block = f"{profile_summary}\n\n" if profile_summary else ""
+
+        # ── Parallel tasks (no dependency on each other) ─────────────────────
 
         coach_task = Task(
             description=(
                 f"{profile_block}"
-                f"Review this user's message and identify their savings goals, "
-                f"approximate savings capacity, and time horizons:\n\n{context}"
+                f"Identify the user's savings goals, monthly capacity, and time horizons.\n\n{context}"
             ),
             expected_output=(
-                "A concise summary of the user's financial situation: estimated monthly savings, "
-                "short/medium/long-term goals, and any concerns or constraints they mentioned."
+                "Concise bullet list: monthly investable amount, short/medium/long-term goals, "
+                "constraints or concerns the user mentioned."
             ),
             agent=self._coach.build(),
         )
 
         research_task = Task(
             description=(
-                "Based on the savings profile from the coach, search for 2–4 investment options "
-                "that are suitable for a beginner Indian housewife investor. "
-                "Fetch current interest rates and minimum investment amounts for each option."
+                f"{profile_block}"
+                f"Find 2–4 investment options suited to a beginner Indian investor for this query. "
+                f"Fetch current interest rates and minimum investment amounts.\n\n{context}"
             ),
             expected_output=(
-                "A list of 2–4 investment options with current rates, pros, cons, "
-                "minimum investment, and which goal/time horizon each suits best."
+                "Bullet list of 2–4 options: name, current rate, minimum amount, pros/cons, "
+                "and which goal or time horizon each fits."
             ),
             agent=self._researcher.build(),
-            context=[coach_task],
         )
 
-        advisor_task = Task(
-            description=(
-                f"{profile_block}"
-                "Using the user's financial profile above (if provided) and the researched options, "
-                "write a warm, clear, encouraging response directly to the user. "
-                "Reference their specific surplus amount and existing investments where relevant. "
-                "Explain which options you recommend and why, with a simple next step they can take today. "
-                "Match the language (Hindi/English) the user used."
-            ),
-            expected_output=(
-                "A conversational, friendly response to the user that recommends specific "
-                "investment options, explains them simply, and ends with one clear next action."
-            ),
-            agent=self._advisor.build(),
-            context=[coach_task, research_task],
+        coach_crew = Crew(
+            agents=[self._coach.build()],
+            tasks=[coach_task],
+            process=Process.sequential,
+            verbose=False,
         )
-
-        crew = Crew(
-            agents=[self._coach.build(), self._researcher.build(), self._advisor.build()],
-            tasks=[coach_task, research_task, advisor_task],
+        research_crew = Crew(
+            agents=[self._researcher.build()],
+            tasks=[research_task],
             process=Process.sequential,
             verbose=False,
         )
 
-        result = await crew.kickoff_async()
+        coach_result, research_result = await asyncio.gather(
+            coach_crew.kickoff_async(),
+            research_crew.kickoff_async(),
+        )
+
+        # ── Advisor synthesises both outputs ─────────────────────────────────
+
+        advisor_task = Task(
+            description=(
+                f"{profile_block}"
+                f"Situation analysis:\n{coach_result}\n\n"
+                f"Available options:\n{research_result}\n\n"
+                f"Write a warm, specific reply to the user. Reference their surplus and existing "
+                f"investments where relevant. End with one clear next step. "
+                f"Match the language (Hindi/English) the user used.\n\n{context}"
+            ),
+            expected_output=(
+                "Friendly, specific response recommending 1–2 options with reasons, "
+                "and one concrete action the user can take today."
+            ),
+            agent=self._advisor.build(),
+        )
+
+        advisor_crew = Crew(
+            agents=[self._advisor.build()],
+            tasks=[advisor_task],
+            process=Process.sequential,
+            verbose=False,
+        )
+
+        result = await advisor_crew.kickoff_async()
         return str(result)
 
     @staticmethod
@@ -96,7 +117,7 @@ class SahejCrew:
         if not history:
             return ""
         lines = []
-        for msg in history[-10:]:  # last 10 messages for context window
+        for msg in history[-8:]:
             role = "User" if msg["role"] == "user" else "Sahej"
             lines.append(f"{role}: {msg['content']}")
         return "\n".join(lines)
