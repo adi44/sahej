@@ -27,9 +27,16 @@ app.add_middleware(
 async def unhandled_exception_handler(request: Request, exc: Exception):
     tb = traceback.format_exc()
     print(f"\n[500] {request.method} {request.url}\n{tb}")
+    # CORS middleware doesn't wrap exception handler responses, so add headers manually
+    origin = request.headers.get("origin", "")
+    cors_headers = {}
+    if origin in settings.CORS_ORIGINS:
+        cors_headers["Access-Control-Allow-Origin"] = origin
+        cors_headers["Access-Control-Allow-Credentials"] = "true"
     return JSONResponse(
         status_code=500,
-        content={"detail": str(exc), "traceback": tb},
+        content={"detail": str(exc)},
+        headers=cors_headers,
     )
 
 

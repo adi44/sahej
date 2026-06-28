@@ -44,6 +44,21 @@ class SupabaseTable:
         self._prefer = "return=representation"
         return self
 
+    def upsert(self, data: dict, *, on_conflict: str = ""):
+        self._method = "POST"
+        self._body = data
+        prefer = "resolution=merge-duplicates,return=representation"
+        if on_conflict:
+            self._params["on_conflict"] = on_conflict
+        self._prefer = prefer
+        return self
+
+    def update(self, data: dict):
+        self._method = "PATCH"
+        self._body = data
+        self._prefer = "return=representation"
+        return self
+
     def eq(self, column: str, value):
         self._params[column] = f"eq.{value}"
         return self
@@ -70,6 +85,8 @@ class SupabaseTable:
 
         if self._method == "GET":
             r = httpx.get(url, headers=headers, params=self._params, timeout=10.0)
+        elif self._method == "PATCH":
+            r = httpx.patch(url, headers=headers, params=self._params, json=self._body, timeout=10.0)
         else:
             r = httpx.post(url, headers=headers, params=self._params, json=self._body, timeout=10.0)
 
