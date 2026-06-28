@@ -1,7 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException
+
 from app.api.deps import current_user
 from app.services.supabase import get_authed_client
 from app.schemas.profile import ProfileCreate
+from app.repositories import ProfileRepository
 
 router = APIRouter(prefix="/profile", tags=["profile"])
 
@@ -9,26 +11,22 @@ router = APIRouter(prefix="/profile", tags=["profile"])
 @router.get("/")
 async def get_profile(auth=Depends(current_user)):
     user, jwt = auth
-    db = get_authed_client(jwt)
-    res = db.table("financial_profiles").select("*").eq("user_id", user["id"]).limit(1).execute()
-    if not res.data:
+    profile = ProfileRepository(get_authed_client(jwt)).get(user["id"])
+    if not profile:
         raise HTTPException(status_code=404, detail="Profile not found")
-    return res.data[0]
+    return profile
 
 
 @router.post("/")
 async def upsert_profile(body: ProfileCreate, auth=Depends(current_user)):
     user, jwt = auth
-    db = get_authed_client(jwt)
 
     monthly_expenses = (
         body.rent_or_emi + body.other_emis + body.school_fees +
         body.groceries_utilities + body.other_expenses
     )
-    investable_surplus = max(0.0, body.monthly_income - monthly_expenses)
 
-    payload = {
-        "user_id": user["id"],
+    data = {
         "monthly_income": body.monthly_income,
         "income_source": body.income_source,
         "income_is_regular": body.income_is_regular,
@@ -38,7 +36,7 @@ async def upsert_profile(body: ProfileCreate, auth=Depends(current_user)):
         "groceries_utilities": body.groceries_utilities,
         "other_expenses": body.other_expenses,
         "monthly_expenses": monthly_expenses,
-        "investable_surplus": investable_surplus,
+        "investable_surplus": max(0.0, body.monthly_income - monthly_expenses),
         "savings_balance": body.savings_balance,
         "existing_investments": body.existing_investments,
         "has_insurance": body.has_insurance,
@@ -48,5 +46,4 @@ async def upsert_profile(body: ProfileCreate, auth=Depends(current_user)):
         "children_ages": body.children_ages,
     }
 
-    res = db.table("financial_profiles").upsert(payload, on_conflict="user_id").execute()
-    return res.data[0]
+    return ProfileRepository(get_authed_client(jwt)).upsert(user["id"], data)

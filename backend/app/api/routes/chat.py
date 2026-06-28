@@ -1,8 +1,10 @@
 from fastapi import APIRouter, Depends, HTTPException
+
 from app.api.deps import current_user
 from app.services.supabase import get_authed_client
 from app.schemas.chat import ChatRequest
 from app.crew import SahejCrew
+from app.repositories import ChatRepository, ProfileRepository
 from app.utils.profile_summary import build_profile_summary
 
 router = APIRouter(prefix="/chat", tags=["chat"])
@@ -12,60 +14,39 @@ router = APIRouter(prefix="/chat", tags=["chat"])
 async def chat(body: ChatRequest, auth=Depends(current_user)):
     user, jwt = auth
     db = get_authed_client(jwt)
+    chat_repo = ChatRepository(db)
+    profile_repo = ProfileRepository(db)
 
     # Resolve or create session
     if body.session_id:
-        res = db.table("chat_sessions").select("*").eq("id", body.session_id).single().execute()
-        if not res.data:
+        session = chat_repo.get_session(body.session_id)
+        if not session:
             raise HTTPException(status_code=404, detail="Session not found")
-        session = res.data
     else:
-        res = db.table("chat_sessions").insert({
-            "user_id": user["id"],
-            "title": body.message[:60],
-        }).execute()
-        session = res.data[0]
+        session = chat_repo.create_session(user["id"], body.message)
 
     # Fetch history for crew context
-    history_res = db.table("chat_messages") \
-        .select("role, content") \
-        .eq("session_id", session["id"]) \
-        .order("created_at") \
-        .limit(10) \
-        .execute()
-    history = history_res.data or []
+    history = chat_repo.get_history(session["id"])
 
     # Save user message
-    db.table("chat_messages").insert({
-        "session_id": session["id"],
-        "role": "user",
-        "content": body.message,
-    }).execute()
+    chat_repo.save_message(session["id"], "user", body.message)
 
-    # Inject financial profile only on the first message of a session.
-    # After that the conversation history carries the context — no need to
-    # resend the full profile block on every turn.
+    # Inject financial profile only on the first message of a session
     profile_summary = ""
     if not history:
-        profile_res = db.table("financial_profiles").select("*").eq("user_id", user["id"]).limit(1).execute()
-        if profile_res.data:
-            profile_summary = build_profile_summary(profile_res.data[0])
+        profile = profile_repo.get(user["id"])
+        if profile:
+            profile_summary = build_profile_summary(profile)
 
     # Run crew
-    crew = SahejCrew()
-    response_text = await crew.run(
+    response_text = await SahejCrew().run(
         user_message=body.message,
         chat_history=history,
         profile_summary=profile_summary,
     )
 
-    # Save assistant message
-    db.table("chat_messages").insert({
-        "session_id": session["id"],
-        "role": "assistant",
-        "content": response_text,
-        "agent_metadata": {"crew": "SahejCrew"},
-    }).execute()
+    # Save assistant reply
+    chat_repo.save_message(session["id"], "assistant", response_text, {"crew": "SahejCrew"})
 
     return {"session_id": session["id"], "message": response_text}
 
@@ -73,28 +54,16 @@ async def chat(body: ChatRequest, auth=Depends(current_user)):
 @router.get("/sessions")
 async def list_sessions(auth=Depends(current_user)):
     user, jwt = auth
-    db = get_authed_client(jwt)
-    res = db.table("chat_sessions") \
-        .select("id, title, created_at, updated_at") \
-        .eq("user_id", user["id"]) \
-        .order("updated_at", desc=True) \
-        .execute()
-    return res.data or []
+    return ChatRepository(get_authed_client(jwt)).list_sessions(user["id"])
 
 
 @router.get("/sessions/{session_id}")
 async def get_session(session_id: str, auth=Depends(current_user)):
     user, jwt = auth
-    db = get_authed_client(jwt)
+    repo = ChatRepository(get_authed_client(jwt))
 
-    session_res = db.table("chat_sessions").select("*").eq("id", session_id).single().execute()
-    if not session_res.data:
+    session = repo.get_session(session_id)
+    if not session:
         raise HTTPException(status_code=404, detail="Session not found")
 
-    messages_res = db.table("chat_messages") \
-        .select("*") \
-        .eq("session_id", session_id) \
-        .order("created_at") \
-        .execute()
-
-    return {**session_res.data, "messages": messages_res.data or []}
+    return {**session, "messages": repo.get_messages(session_id)}
