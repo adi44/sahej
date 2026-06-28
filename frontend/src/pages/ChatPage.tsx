@@ -1,5 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import { supabase } from "../lib/supabase";
 import { sendMessage, getSessions, getSession, type ChatSession, type ChatMessage } from "../api/chat";
 import Logo from "../components/Logo";
@@ -376,11 +378,16 @@ function MessageBubble({ msg, speakingId, onSpeak, onStop }: {
           color: isUser ? "#fff" : "var(--text)",
           fontSize: 14,
           lineHeight: 1.65,
-          whiteSpace: "pre-wrap",
           boxShadow: isUser ? "none" : "0 1px 3px rgba(0,0,0,0.07)",
           border: isUser ? "none" : "1px solid var(--border)",
         }}>
-          {msg.content}
+          {isUser ? (
+            <span style={{ whiteSpace: "pre-wrap" }}>{msg.content}</span>
+          ) : (
+            <div className="md-body">
+              <ReactMarkdown remarkPlugins={[remarkGfm]}>{msg.content}</ReactMarkdown>
+            </div>
+          )}
         </div>
         {!isUser && (
           <div style={{ marginTop: 4, marginLeft: 4 }}>
