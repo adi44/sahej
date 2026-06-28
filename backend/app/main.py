@@ -10,7 +10,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from app.core.config import settings
-from app.api.routes import chat, schemes, tts
+from app.api.routes import chat, schemes, tts, profile
 
 app = FastAPI(title="Sahej API")
 
@@ -36,6 +36,7 @@ async def unhandled_exception_handler(request: Request, exc: Exception):
 app.include_router(chat.router, prefix="/api")
 app.include_router(schemes.router, prefix="/api")
 app.include_router(tts.router, prefix="/api")
+app.include_router(profile.router, prefix="/api")
 
 
 @app.get("/health")
