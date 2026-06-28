@@ -3,6 +3,7 @@ from app.api.deps import current_user
 from app.services.supabase import get_authed_client
 from app.schemas.chat import ChatRequest
 from app.crew import SahejCrew
+from app.utils.profile_summary import build_profile_summary
 
 router = APIRouter(prefix="/chat", tags=["chat"])
 
@@ -41,9 +42,19 @@ async def chat(body: ChatRequest, auth=Depends(current_user)):
         "content": body.message,
     }).execute()
 
+    # Fetch financial profile for personalised context (optional — not all users may have one)
+    profile_summary = ""
+    profile_res = db.table("financial_profiles").select("*").eq("user_id", user["id"]).limit(1).execute()
+    if profile_res.data:
+        profile_summary = build_profile_summary(profile_res.data[0])
+
     # Run crew
     crew = SahejCrew()
-    response_text = await crew.run(user_message=body.message, chat_history=history)
+    response_text = await crew.run(
+        user_message=body.message,
+        chat_history=history,
+        profile_summary=profile_summary,
+    )
 
     # Save assistant message
     db.table("chat_messages").insert({

@@ -22,7 +22,12 @@ class SahejCrew:
         self._researcher = InvestmentResearcherAgent()
         self._coach = SavingsCoachAgent()
 
-    async def run(self, user_message: str, chat_history: list[dict]) -> str:
+    async def run(
+        self,
+        user_message: str,
+        chat_history: list[dict],
+        profile_summary: str = "",
+    ) -> str:
         history_text = self._format_history(chat_history)
 
         context = (
@@ -30,8 +35,11 @@ class SahejCrew:
             f"Latest user message: {user_message}"
         ) if history_text else user_message
 
+        profile_block = f"{profile_summary}\n\n" if profile_summary else ""
+
         coach_task = Task(
             description=(
+                f"{profile_block}"
                 f"Review this user's message and identify their savings goals, "
                 f"approximate savings capacity, and time horizons:\n\n{context}"
             ),
@@ -58,9 +66,11 @@ class SahejCrew:
 
         advisor_task = Task(
             description=(
-                "Using the savings profile and the researched options, write a warm, clear, "
-                "encouraging response directly to the user. Explain which options you recommend "
-                "and why, with a simple next step they can take today. "
+                f"{profile_block}"
+                "Using the user's financial profile above (if provided) and the researched options, "
+                "write a warm, clear, encouraging response directly to the user. "
+                "Reference their specific surplus amount and existing investments where relevant. "
+                "Explain which options you recommend and why, with a simple next step they can take today. "
                 "Match the language (Hindi/English) the user used."
             ),
             expected_output=(
