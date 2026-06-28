@@ -42,11 +42,14 @@ async def chat(body: ChatRequest, auth=Depends(current_user)):
         "content": body.message,
     }).execute()
 
-    # Fetch financial profile for personalised context (optional — not all users may have one)
+    # Inject financial profile only on the first message of a session.
+    # After that the conversation history carries the context — no need to
+    # resend the full profile block on every turn.
     profile_summary = ""
-    profile_res = db.table("financial_profiles").select("*").eq("user_id", user["id"]).limit(1).execute()
-    if profile_res.data:
-        profile_summary = build_profile_summary(profile_res.data[0])
+    if not history:
+        profile_res = db.table("financial_profiles").select("*").eq("user_id", user["id"]).limit(1).execute()
+        if profile_res.data:
+            profile_summary = build_profile_summary(profile_res.data[0])
 
     # Run crew
     crew = SahejCrew()
