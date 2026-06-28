@@ -1,9 +1,34 @@
 import httpx
 from app.core.config import settings
 
-# Base URLs
 _AUTH_URL = f"{settings.SUPABASE_URL}/auth/v1"
 _REST_URL = f"{settings.SUPABASE_URL}/rest/v1"
+
+# Shared connection pool — initialized once at startup, closed at shutdown.
+# All SupabaseTable.execute() calls reuse TCP connections from this pool
+# instead of opening a new connection per DB call.
+_http: httpx.Client | None = None
+
+
+def init_http_client() -> None:
+    global _http
+    _http = httpx.Client(
+        timeout=httpx.Timeout(connect=5.0, read=10.0, write=10.0, pool=5.0),
+        limits=httpx.Limits(max_connections=20, max_keepalive_connections=10),
+    )
+
+
+def close_http_client() -> None:
+    global _http
+    if _http is not None:
+        _http.close()
+        _http = None
+
+
+def _client() -> httpx.Client:
+    if _http is None:
+        raise RuntimeError("HTTP client not initialised — application startup incomplete")
+    return _http
 
 
 def _headers(jwt: str) -> dict:
@@ -16,14 +41,14 @@ def _headers(jwt: str) -> dict:
 
 def get_user(jwt: str) -> dict | None:
     try:
-        r = httpx.get(f"{_AUTH_URL}/user", headers=_headers(jwt), timeout=5.0)
+        r = _client().get(f"{_AUTH_URL}/user", headers=_headers(jwt))
         return r.json() if r.status_code == 200 else None
     except Exception:
         return None
 
 
 class SupabaseTable:
-    """Minimal query builder that mirrors the supabase-py table API."""
+    """Minimal PostgREST query builder."""
 
     def __init__(self, jwt: str, table: str) -> None:
         self._jwt = jwt
@@ -47,10 +72,9 @@ class SupabaseTable:
     def upsert(self, data: dict, *, on_conflict: str = ""):
         self._method = "POST"
         self._body = data
-        prefer = "resolution=merge-duplicates,return=representation"
+        self._prefer = "resolution=merge-duplicates,return=representation"
         if on_conflict:
             self._params["on_conflict"] = on_conflict
-        self._prefer = prefer
         return self
 
     def update(self, data: dict):
@@ -75,7 +99,7 @@ class SupabaseTable:
         self._single = True
         return self
 
-    def execute(self):
+    def execute(self) -> "_Result":
         url = f"{_REST_URL}/{self._table}"
         headers = _headers(self._jwt)
         if self._prefer:
@@ -83,18 +107,17 @@ class SupabaseTable:
         if self._single:
             headers["Accept"] = "application/vnd.pgrst.object+json"
 
+        client = _client()
         if self._method == "GET":
-            r = httpx.get(url, headers=headers, params=self._params, timeout=10.0)
+            r = client.get(url, headers=headers, params=self._params)
         elif self._method == "PATCH":
-            r = httpx.patch(url, headers=headers, params=self._params, json=self._body, timeout=10.0)
+            r = client.patch(url, headers=headers, params=self._params, json=self._body)
         else:
-            r = httpx.post(url, headers=headers, params=self._params, json=self._body, timeout=10.0)
+            r = client.post(url, headers=headers, params=self._params, json=self._body)
 
         if r.status_code >= 400:
             return _Result(None, r.text)
-
-        data = r.json()
-        return _Result(data, None)
+        return _Result(r.json(), None)
 
 
 class _Result:

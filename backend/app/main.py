@@ -1,8 +1,8 @@
 import traceback
 import os
+from contextlib import asynccontextmanager
 from dotenv import load_dotenv
 
-# Load .env into os.environ so crewai/openai/serper libraries can find their keys
 load_dotenv()
 
 from fastapi import FastAPI, Request
@@ -10,9 +10,18 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from app.core.config import settings
+from app.services.supabase import init_http_client, close_http_client
 from app.api.routes import chat, schemes, tts, profile
 
-app = FastAPI(title="Sahej API")
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    init_http_client()
+    yield
+    close_http_client()
+
+
+app = FastAPI(title="Sahej API", lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
@@ -27,7 +36,6 @@ app.add_middleware(
 async def unhandled_exception_handler(request: Request, exc: Exception):
     tb = traceback.format_exc()
     print(f"\n[500] {request.method} {request.url}\n{tb}")
-    # CORS middleware doesn't wrap exception handler responses, so add headers manually
     origin = request.headers.get("origin", "")
     cors_headers = {}
     if origin in settings.CORS_ORIGINS:
