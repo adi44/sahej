@@ -10,10 +10,10 @@ router = APIRouter(prefix="/profile", tags=["profile"])
 async def get_profile(auth=Depends(current_user)):
     user, jwt = auth
     db = get_authed_client(jwt)
-    res = db.table("financial_profiles").select("*").eq("user_id", user["id"]).maybe_single().execute()
+    res = db.table("financial_profiles").select("*").eq("user_id", user["id"]).limit(1).execute()
     if not res.data:
         raise HTTPException(status_code=404, detail="Profile not found")
-    return res.data
+    return res.data[0]
 
 
 @router.post("/")
