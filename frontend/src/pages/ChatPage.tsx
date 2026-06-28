@@ -188,15 +188,24 @@ export default function ChatPage() {
         {/* Messages */}
         <div style={{ flex: 1, overflowY: "auto", padding: "24px", display: "flex", flexDirection: "column", gap: 4 }}>
           {!activeSession?.messages?.length && !loading && (
-            <div style={{ margin: "auto", textAlign: "center", color: "var(--text-muted)" }}>
-              <div style={{ display: "flex", justifyContent: "center", marginBottom: 12 }}><Logo size={72} /></div>
-              <div style={{ fontSize: 18, fontWeight: 600, color: "var(--text)", marginBottom: 8 }}>
+            <div style={{
+              flex: 1,
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              textAlign: "center",
+              color: "var(--text-muted)",
+              padding: "40px 24px",
+            }}>
+              <Logo size={80} />
+              <div style={{ fontSize: 20, fontWeight: 700, color: "var(--text)", marginTop: 16, marginBottom: 8 }}>
                 Namaste! I'm Sahej
               </div>
-              <div style={{ fontSize: 14, maxWidth: 380, lineHeight: 1.6 }}>
+              <div style={{ fontSize: 14, maxWidth: 380, lineHeight: 1.7, margin: "0 auto" }}>
                 Ask me anything about saving and investing — in Hindi or English. I'll find the best options for you.
               </div>
-              <div style={{ marginTop: 24, display: "flex", flexWrap: "wrap", gap: 8, justifyContent: "center" }}>
+              <div style={{ marginTop: 28, display: "flex", flexWrap: "wrap", gap: 8, justifyContent: "center", maxWidth: 560, margin: "28px auto 0" }}>
                 {[
                   "Where should I invest ₹5,000 per month?",
                   "What is PPF and should I invest in it?",
@@ -205,9 +214,9 @@ export default function ChatPage() {
                 ].map((q) => (
                   <button
                     key={q}
-                    onClick={() => { setInput(q); }}
+                    onClick={() => setInput(q)}
                     style={{
-                      padding: "8px 14px",
+                      padding: "9px 16px",
                       borderRadius: 20,
                       border: "1.5px solid var(--primary-light)",
                       background: "var(--primary-light)",
